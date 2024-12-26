@@ -1,3 +1,3 @@
 pub const c = @cImport({
-    @cInclude("GL/gl.h");
+    @cInclude("glad.h");
 });
