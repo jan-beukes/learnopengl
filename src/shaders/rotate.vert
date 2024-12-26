@@ -1,15 +1,16 @@
 #version 330 core
 
-// input atributes
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
 
-out vec3 vertColor;
 out vec2 fragPos;
+out vec3 vertColor;
+
+uniform float time;
 
 void main() {
-    vertColor = aColor;
     fragPos = aPos.xy;
-    gl_Position = vec4(aPos, 1.0);
-}
+    vertColor = aColor;
 
+    gl_Position = vec4(aPos.x * cos(time), aPos.y * sin(time), aPos.z, 1.0);
+}

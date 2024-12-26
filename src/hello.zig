@@ -4,12 +4,10 @@ const zmath = @import("zmath");
 const c = @import("c.zig").c;
 
 const print = std.debug.print;
+const Shader = @import("Shader.zig");
 
 const window_width = 800;
 const window_height = 600;
-
-const vert_source = @embedFile("shaders/basic.vert");
-const frag_source = @embedFile("shaders/basic.frag");
 
 fn windowResizeCallback(window: *glfw.Window, width: i32, height: i32) callconv(.C) void {
     _ = window;
@@ -20,23 +18,6 @@ fn processInput(window: *glfw.Window) void {
     if (window.getKey(.escape) == .press) {
         window.setShouldClose(true);
     }
-}
-
-fn compileShader(source: [*]const u8, shader_type: c_uint) c_uint {
-    const shader = c.glCreateShader(shader_type);
-    c.glShaderSource(shader, 1, &source, null);
-    c.glCompileShader(shader);
-
-    var success: i32 = undefined;
-    c.glGetShaderiv(shader, c.GL_COMPILE_STATUS, &success);
-    if (success == 0) {
-        var buff: [512]u8 = undefined;
-        c.glGetShaderInfoLog(shader, 512, null, &buff);
-        const type_name = if (shader_type == c.GL_VERTEX_SHADER) "vertex" else "fragment";
-        print("{s} shader compilation failed\n{s}\n", .{ type_name, buff });
-    }
-
-    return shader;
 }
 
 pub fn main() !void {
@@ -65,31 +46,20 @@ pub fn main() !void {
     _ = window.setFramebufferSizeCallback(windowResizeCallback);
 
     //shaders
-    const vertex_shader = compileShader(vert_source, c.GL_VERTEX_SHADER);
-    const fragment_shader = compileShader(frag_source, c.GL_FRAGMENT_SHADER);
-    const shader_program = c.glCreateProgram();
-    c.glAttachShader(shader_program, vertex_shader);
-    c.glAttachShader(shader_program, fragment_shader);
-    c.glLinkProgram(shader_program);
-
-    var success: i32 = undefined;
-    c.glGetProgramiv(shader_program, c.GL_LINK_STATUS, &success);
-    if (success == 0) {
-        var buff: [512]u8 = undefined;
-        c.glGetProgramInfoLog(shader_program, 512, null, &buff);
-        print("Error linking shader program\n{s}\n", .{buff});
-    }
-    c.glDeleteShader(vertex_shader);
-    c.glDeleteShader(fragment_shader);
+    const shader_left = Shader.init("src/shaders/rotate.vert", "src/shaders/basic.frag");
+    const shader_right = Shader.init("src/shaders/basic.vert", "src/shaders/basic.frag");
+    defer shader_left.deinit();
+    defer shader_right.deinit();
 
     // setup vetex data, buffer and VAO
     const vertices = [_]f32{
-        -1, -1, 0.0, // bl
-        0, -1, 0.0, // br
-        -0.5, 0.5, 0.0, // top
-        0, -1, 0.0, // bl
-        1, -1, 0.0, // br
-        0.5, 0.5, 0.0, // top
+        // positions    // colors
+        -1, -1, 0.0, 1.0, 0.0, 0.0, // bl
+        0, -1, 0.0, 0.0, 1.0, 0.0, // br
+        -0.5, 0.5, 0.0, 0.0, 0.0, 1.0, // top
+        0, -1, 0.0, 1.0, 1.0, 1.0, // bl
+        1, -1, 0.0, 1.0, 1.0, 1.0, // br
+        0.5, 0.5, 0.0, 1.0, 1.0, 1.0, // top
     };
     var VBO: u32 = undefined;
     var VAO: u32 = undefined;
@@ -101,29 +71,48 @@ pub fn main() !void {
     c.glBindBuffer(c.GL_ARRAY_BUFFER, VBO);
     c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
 
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @ptrFromInt(0));
+    // atribLocation, length(vec3), type, normalize values?, stride length, offset
+    // pos
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @ptrFromInt(0));
     c.glEnableVertexAttribArray(0);
+    // color
+    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @ptrFromInt(3 * @sizeOf(f32)));
+    c.glEnableVertexAttribArray(1);
 
     // this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     c.glBindBuffer(c.GL_ARRAY_BUFFER, 0);
 
     // render loop
     while (!window.shouldClose()) {
+        // input
         processInput(window);
 
         //render
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT);
 
-        // draw the triangle
-        c.glUseProgram(shader_program);
         c.glBindVertexArray(VAO); // dont really need to bind every time since we ony have one
-        c.glDrawArrays(c.GL_TRIANGLES, 0, 6);
+
+        shader_left.use();
+        // update uniform
+        const time: f32 = @floatCast(glfw.getTime());
+        shader_left.setFloat("time", time);
+
+        // draw left triangle
+        c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
+
+        shader_right.use();
+        const val1: f32 = @sin(time) / 2.0 + 0.5;
+        const val2: f32 = @sin(time + std.math.pi / 2.0) / 2.0 + 0.5;
+        const val3: f32 = @sin(time + std.math.pi) / 2.0 + 0.5;
+        shader_right.setVec4("myColor", .{ val1, val2, val3, 1.0 });
+
+        // draw right triangle
+        c.glDrawArrays(c.GL_TRIANGLES, 3, 3);
 
         window.swapBuffers();
         glfw.pollEvents();
     }
     c.glDeleteVertexArrays(1, &VAO);
     c.glDeleteBuffers(1, &VBO);
-    c.glDeleteProgram(shader_program);
 }

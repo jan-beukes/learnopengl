@@ -1,3 +1,3 @@
 pub const c = @cImport({
-    @cInclude("glad.h");
+    @cInclude("external/glad.h");
 });
