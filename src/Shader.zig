@@ -99,3 +99,7 @@ pub fn setVec4(self: Self, name: [*]const u8, value: [4]f32) void {
 pub fn setVec3V(self: Self, name: [*]const u8, value: [][3]f32) void {
     c.glUniform3fv(c.glGetUniformLocation(self.ID, name), value.len, value.ptr);
 }
+
+pub fn setMat4(self: Self, name: [*]const u8, value: [4][4]f32) void {
+    c.glUniformMatrix4fv(c.glGetUniformLocation(self.ID, name), 1, c.GL_FALSE, @ptrCast(&value));
+}

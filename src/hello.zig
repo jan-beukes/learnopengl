@@ -1,6 +1,7 @@
 const std = @import("std");
 const glfw = @import("glfw");
 const c = @import("c.zig").c;
+const linalg = @import("zalgebra");
 
 const print = std.debug.print;
 const Shader = @import("Shader.zig");
@@ -82,9 +83,13 @@ pub fn main() !void {
     c.glBindBuffer(c.GL_ARRAY_BUFFER, 0);
 
     // render loop
+    var time: f64 = 0;
+    var transform = linalg.Mat4.identity();
     while (!window.shouldClose()) {
         // input
         processInput(window);
+        const dt: f32 = @floatCast(glfw.getTime() - time);
+        time = glfw.getTime();
 
         //render
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
@@ -94,16 +99,17 @@ pub fn main() !void {
 
         shader_left.use();
         // update uniform
-        const time: f32 = @floatCast(glfw.getTime());
-        shader_left.setFloat("time", time);
+        transform = transform.rotate(dt * 100, linalg.Vec3.new(0, 0, 1));
+        shader_left.setMat4("transform", transform.data);
 
         // draw left triangle
         c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
 
         shader_right.use();
-        const val1: f32 = @sin(time) / 2.0 + 0.5;
-        const val2: f32 = @sin(time + std.math.pi / 2.0) / 2.0 + 0.5;
-        const val3: f32 = @sin(time + std.math.pi) / 2.0 + 0.5;
+        const time32: f32 = @floatCast(time);
+        const val1: f32 = @sin(time32) / 2.0 + 0.5;
+        const val2: f32 = @sin(time32 + std.math.pi / 2.0) / 2.0 + 0.5;
+        const val3: f32 = @sin(time32 + std.math.pi) / 2.0 + 0.5;
         shader_right.setVec4("myColor", .{ val1, val2, val3, 1.0 });
 
         // draw right triangle
