@@ -19,9 +19,10 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("zmath", zmath.module("root"));
     exe.linkLibrary(glfw.artifact("glfw"));
 
-    // opengl
+    // extra
     exe.addIncludePath(b.path("src"));
     exe.addCSourceFile(.{ .file = b.path("src/external/glad.c") });
+    exe.addCSourceFile(.{ .file = b.path("src/external/stb_image.c") });
     exe.linkSystemLibrary("GL");
 
     b.installArtifact(exe);

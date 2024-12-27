@@ -6,7 +6,7 @@ const Self = @This();
 // attributes
 ID: u32,
 
-pub fn initString(vertex_src: []const u8, fragment_src: []const u8) Self {
+pub fn initString(vertex_src: [:0]const u8, fragment_src: [:0]const u8) Self {
     var success: i32 = undefined;
     var info_log: [512]u8 = undefined;
     const vertex = c.glCreateShader(c.GL_VERTEX_SHADER);

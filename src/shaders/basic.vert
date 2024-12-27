@@ -3,13 +3,14 @@
 // input atributes
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
 
-out vec3 vertColor;
-out vec2 fragPos;
+out vec3 fragColor;
+out vec2 texCoord;
 
 void main() {
-    vertColor = aColor;
-    fragPos = aPos.xy;
+    fragColor = aColor;
+    texCoord = aTexCoord;
     gl_Position = vec4(aPos, 1.0);
 }
 

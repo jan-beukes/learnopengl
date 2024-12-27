@@ -1,6 +1,5 @@
 const std = @import("std");
 const glfw = @import("glfw");
-const zmath = @import("zmath");
 const c = @import("c.zig").c;
 
 const print = std.debug.print;
@@ -46,8 +45,8 @@ pub fn main() !void {
     _ = window.setFramebufferSizeCallback(windowResizeCallback);
 
     //shaders
-    const shader_left = Shader.init("src/shaders/rotate.vert", "src/shaders/basic.frag");
-    const shader_right = Shader.init("src/shaders/basic.vert", "src/shaders/basic.frag");
+    const shader_left = Shader.init("src/shaders/rotate.vert", "src/shaders/two.frag");
+    const shader_right = Shader.init("src/shaders/basic.vert", "src/shaders/two.frag");
     defer shader_left.deinit();
     defer shader_right.deinit();
 
