@@ -8,9 +8,9 @@ const Shader = @import("Shader.zig");
 const window_width = 800;
 const window_height = 600;
 
-fn windowResizeCallback(window: *glfw.Window, width: i32, height: i32) callconv(.C) void {
+fn windowResizeCallback(window: glfw.Window, width: u32, height: u32) void {
     _ = window;
-    c.glViewport(0, 0, width, height);
+    c.glViewport(0, 0, @intCast(width), @intCast(height));
 }
 
 fn processInput(window: *glfw.Window) void {
@@ -19,14 +19,18 @@ fn processInput(window: *glfw.Window) void {
     }
 }
 
-fn init() !*glfw.Window {
-    try glfw.init();
-    glfw.windowHint(.context_version_major, 3);
-    glfw.windowHint(.context_version_minor, 3);
-    glfw.windowHint(.opengl_profile, @intFromEnum(glfw.OpenGLProfile.opengl_core_profile));
+fn init() !glfw.Window {
+    if (!glfw.init(.{})) {
+        std.log.err("dude\n", .{});
+        return error.GLFW;
+    }
 
     // init glfw window
-    const window = glfw.Window.create(window_width, window_height, "EPIC WINDOW", null) catch {
+    const window: glfw.Window = glfw.Window.create(window_width, window_height, "EPIC WINDOW", null, null, .{
+        .context_version_major = 3,
+        .context_version_minor = 3,
+        .opengl_profile = .opengl_core_profile,
+    }) orelse {
         print("Failed to create window\n", .{});
         glfw.terminate();
         return error.GLFW;
@@ -40,7 +44,7 @@ fn init() !*glfw.Window {
     }
 
     c.glViewport(0, 0, window_width, window_height);
-    _ = window.setFramebufferSizeCallback(windowResizeCallback);
+    window.setFramebufferSizeCallback(windowResizeCallback);
     return window;
 }
 
@@ -77,8 +81,7 @@ fn loadTexture(file: [:0]const u8) u32 {
 }
 
 pub fn main() !void {
-    const window = try init();
-    defer window.destroy();
+    var window = try init();
 
     //shaders
     const shader = Shader.init("src/shaders/basic.vert", "src/shaders/texture_blend.frag");
@@ -131,7 +134,7 @@ pub fn main() !void {
     // render loop
     while (!window.shouldClose()) {
         // input
-        processInput(window);
+        processInput(&window);
 
         //render
         c.glClearColor(0.2, 0.3, 0.3, 1.0);

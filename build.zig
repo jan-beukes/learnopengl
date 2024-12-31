@@ -13,11 +13,11 @@ pub fn build(b: *std.Build) void {
     });
 
     // glfw and math
-    const glfw = b.dependency("zglfw", .{ .target = target, .optimize = optimize });
+    const glfw = b.dependency("mach-glfw", .{ .target = target, .optimize = optimize });
     const zalgebra = b.dependency("zalgebra", .{ .target = target, .optimize = optimize });
-    exe.root_module.addImport("glfw", glfw.module("root"));
+    exe.root_module.addImport("glfw", glfw.module("mach-glfw"));
     exe.root_module.addImport("zalgebra", zalgebra.module("zalgebra"));
-    exe.linkLibrary(glfw.artifact("glfw"));
+    exe.linkSystemLibrary("glfw3");
 
     // extra
     exe.addIncludePath(b.path("src"));

@@ -9,7 +9,7 @@ const Shader = @import("Shader.zig");
 const window_width = 800;
 const window_height = 600;
 
-fn windowResizeCallback(window: *glfw.Window, width: i32, height: i32) callconv(.C) void {
+fn windowResizeCallback(window: glfw.Window, width: i32, height: i32) void {
     _ = window;
     c.glViewport(0, 0, width, height);
 }
@@ -21,16 +21,19 @@ fn processInput(window: *glfw.Window) void {
 }
 
 pub fn main() !void {
-    try glfw.init();
-    defer glfw.terminate();
-    glfw.windowHint(.context_version_major, 3);
-    glfw.windowHint(.context_version_minor, 3);
-    glfw.windowHint(.opengl_profile, @intFromEnum(glfw.OpenGLProfile.opengl_core_profile));
+    if (!glfw.init(.{})) {
+        std.log.err("damn", .{});
+        return error.GLFW;
+    }
 
+    defer glfw.terminate();
     // init glfw window
-    const window = glfw.Window.create(window_width, window_height, "EPIC WINDOW", null) catch {
-        print("Failed to create window\n", .{});
-        glfw.terminate();
+    var window: glfw.Window = glfw.Window.create(window_width, window_height, "EPIC WINDOW", null, null, .{
+        .context_version_major = 3,
+        .context_version_minor = 3,
+        .opengl_profile = .opengl_core_profile,
+    }) orelse {
+        std.log.err("Damn\n", .{});
         return error.GLFW;
     };
     defer window.destroy();
@@ -43,7 +46,6 @@ pub fn main() !void {
     }
 
     c.glViewport(0, 0, window_width, window_height);
-    _ = window.setFramebufferSizeCallback(windowResizeCallback);
 
     //shaders
     const shader_left = Shader.init("src/shaders/rotate.vert", "src/shaders/two.frag");
@@ -87,7 +89,7 @@ pub fn main() !void {
     var transform = linalg.Mat4.identity();
     while (!window.shouldClose()) {
         // input
-        processInput(window);
+        processInput(&window);
         const dt: f32 = @floatCast(glfw.getTime() - time);
         time = glfw.getTime();
 
