@@ -12,6 +12,8 @@ pub const CameraMovement = enum {
     backward,
     left,
     right,
+    up,
+    down,
 };
 const yaw_d: f32 = -90.0;
 const pitch_d: f32 = 0.0;
@@ -68,6 +70,8 @@ pub fn processKeyboard(self: *Camera, dir: CameraMovement, dt: f32) void {
         .backward => self.pos = self.pos.sub(self.front.scale(vel)),
         .right => self.pos = self.pos.add(self.right.scale(vel)),
         .left => self.pos = self.pos.sub(self.right.scale(vel)),
+        .up => self.pos = self.pos.add(self.world_up.scale(vel)),
+        .down => self.pos = self.pos.sub(self.world_up.scale(vel)),
     }
 }
 
