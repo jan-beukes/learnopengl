@@ -58,7 +58,7 @@ pub fn init(vertex_path: []const u8, fragment_path: []const u8) Self {
         break :blk "";
     };
     const frag_src = std.fs.cwd().readFileAllocOptions(alloc, fragment_path, std.math.maxInt(i32), null, 8, 0) catch |e| blk: {
-        std.debug.print("Error: Could not read vertex shader {}\n", .{e});
+        std.debug.print("Error: Could not read fragment shader {}\n", .{e});
         break :blk "";
     };
 
