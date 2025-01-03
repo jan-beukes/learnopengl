@@ -77,29 +77,29 @@ pub fn use(self: Self) void {
     c.glUseProgram(self.ID);
 }
 
-pub fn setBool(self: Self, name: [*]const u8, value: bool) void {
+pub fn setBool(self: Self, name: [*:0]const u8, value: bool) void {
     c.glUniform1i(c.glGetUniformLocation(self.ID, name), @intFromBool(value));
 }
-pub fn setInt(self: Self, name: [*]const u8, value: i32) void {
+pub fn setInt(self: Self, name: [*:0]const u8, value: i32) void {
     c.glUniform1i(c.glGetUniformLocation(self.ID, name), value);
 }
-pub fn setFloat(self: Self, name: [*]const u8, value: f32) void {
+pub fn setFloat(self: Self, name: [*:0]const u8, value: f32) void {
     c.glUniform1f(c.glGetUniformLocation(self.ID, name), value);
 }
-pub fn setVec2(self: Self, name: [*]const u8, value: [2]f32) void {
+pub fn setVec2(self: Self, name: [*:0]const u8, value: [2]f32) void {
     c.glUniform2f(c.glGetUniformLocation(self.ID, name), value[0], value[1]);
 }
-pub fn setVec3(self: Self, name: [*]const u8, value: [3]f32) void {
+pub fn setVec3(self: Self, name: [*:0]const u8, value: [3]f32) void {
     c.glUniform3f(c.glGetUniformLocation(self.ID, name), value[0], value[1], value[2]);
 }
-pub fn setVec4(self: Self, name: [*]const u8, value: [4]f32) void {
+pub fn setVec4(self: Self, name: [*:0]const u8, value: [4]f32) void {
     c.glUniform4f(c.glGetUniformLocation(self.ID, name), value[0], value[1], value[2], value[3]);
 }
 
-pub fn setVec3V(self: Self, name: [*]const u8, value: [][3]f32) void {
+pub fn setVec3V(self: Self, name: [*:0]const u8, value: [][3]f32) void {
     c.glUniform3fv(c.glGetUniformLocation(self.ID, name), value.len, value.ptr);
 }
 
-pub fn setMat4(self: Self, name: [*]const u8, value: [4][4]f32) void {
+pub fn setMat4(self: Self, name: [*:0]const u8, value: [4][4]f32) void {
     c.glUniformMatrix4fv(c.glGetUniformLocation(self.ID, name), 1, c.GL_FALSE, @ptrCast(&value));
 }

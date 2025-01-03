@@ -24,6 +24,7 @@ pub fn build(b: *std.Build) void {
     exe.addCSourceFile(.{ .file = b.path("src/external/glad.c") });
     exe.addCSourceFile(.{ .file = b.path("src/external/stb_image.c") });
     exe.linkSystemLibrary("GL");
+    exe.linkSystemLibrary("assimp");
 
     b.installArtifact(exe);
 

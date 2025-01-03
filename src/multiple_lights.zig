@@ -24,7 +24,7 @@ var last_frame: f64 = 0.0;
 
 fn windowResizeCallback(window: glfw.Window, width: u32, height: u32) void {
     _ = window;
-    c.glViewport(0, 0, @intCast(width), @intCast(height));
+    c.glViewport(0, 0, @intCast(width / 4), @intCast(height / 4));
 }
 
 fn mouseCallback(_: glfw.Window, xpos: f64, ypos: f64) void {
@@ -231,7 +231,7 @@ pub fn main() !void {
         processInput(window);
 
         // render
-        c.glClearColor(0.1, 0.1, 0.2, 1.0);
+        c.glClearColor(0.1, 0.1, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
         // lighting
@@ -269,6 +269,7 @@ pub fn main() !void {
 
         // transformation
         const projection = linalg.perspective(camera.zoom, @as(f32, @floatFromInt(window_width)) / window_height, 0.1, 100.0);
+        //const projection = linalg.orthographic(-10, 10, -10, 10, 0.1, 100);
         const view = camera.getViewMatrix();
         lighting_shader.setMat4("projection", projection.data);
         lighting_shader.setMat4("view", view.data);
